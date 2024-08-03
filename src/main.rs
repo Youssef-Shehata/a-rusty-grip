@@ -3,6 +3,17 @@ use std::io;
 use std::process;
 
 fn match_pattern(input_line: &str, pattern: &str) -> bool {
+    if pattern.starts_with("[") {
+        let pattern = pattern.strip_prefix("[").unwrap();
+        let pattern = pattern.strip_suffix("]").unwrap();
+
+        for i in pattern.chars() {
+            if !input_line.contains(i) {
+                return false;
+            }
+        }
+        return true;
+    }
     if pattern.starts_with("\\") {
         match pattern {
             "\\d" => {
