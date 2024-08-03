@@ -7,6 +7,17 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
         let pattern = pattern.strip_prefix("[").unwrap();
         let pattern = pattern.strip_suffix("]").unwrap();
 
+        if pattern.starts_with("^") {
+            let (_, pattern) = pattern.split_at(0);
+
+            for i in pattern.chars() {
+                if input_line.contains(i) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         for i in pattern.chars() {
             if input_line.contains(i) {
                 return true;
