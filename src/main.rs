@@ -3,43 +3,23 @@ use std::io;
 use std::process;
 
 fn match_pattern(input_line: &str, pattern: &str) -> bool {
-    if pattern.starts_with("[") {
-        let pattern = pattern.strip_prefix("[").unwrap();
-        let pattern = pattern.strip_suffix("]").unwrap();
-
-        if pattern.starts_with("^") {
-            let (_, pattern) = pattern.split_at(0);
-
-            for i in pattern.chars() {
-                if input_line.contains(i) {
-                    return false;
+    match pattern {
+        single_letter if single_letter.len() == 1 => input_line.contains(single_letter),
+        r#"\w"# => input_line.contains(|c: char| c.is_alphanumeric()),
+        r#"\d"# => input_line.contains(|c: char| c.is_digit(10)),
+        pat if pat.starts_with("[^") && pat.ends_with("]") => pattern[2..pattern.len() - 1]
+            .chars()
+            .all(|x| !input_line.contains(x)),
+        pat if pat.starts_with("[") && pat.ends_with("]") => {
+            let pattern = &pattern[1..pattern.len() - 1];
+            for c in pattern.chars() {
+                if input_line.contains(c) {
+                    return true;
                 }
             }
-            return true;
+            return false;
         }
-
-        for i in pattern.chars() {
-            if input_line.contains(i) {
-                return true;
-            }
-        }
-        return false;
-    }
-    if pattern.starts_with("\\") {
-        match pattern {
-            "\\d" => {
-                return input_line.contains(|c: char| c.is_digit(10));
-            }
-            "\\w" => {
-                return input_line.contains(|c: char| c.is_alphanumeric());
-            }
-            _ => {}
-        };
-    };
-    if pattern.chars().count() == 1 {
-        return input_line.contains(pattern);
-    } else {
-        panic!("Unhandled pattern: {}", pattern)
+        _ => false,
     }
 }
 
