@@ -6,12 +6,10 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
     if pattern.starts_with("\\") {
         match pattern {
             "\\d" => {
-                for i in input_line.chars() {
-                    if let Some(_) = i.to_digit(10) {
-                        return true;
-                    }
-                }
-                return false;
+                return input_line.contains(|c: char| c.is_digit(10));
+            }
+            "\\w" => {
+                return input_line.contains(|c: char| c.is_alphanumeric());
             }
             _ => {}
         };
