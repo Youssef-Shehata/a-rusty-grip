@@ -8,11 +8,11 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
         let pattern = pattern.strip_suffix("]").unwrap();
 
         for i in pattern.chars() {
-            if !input_line.contains(i) {
-                return false;
+            if input_line.contains(i) {
+                return true;
             }
         }
-        return true;
+        return false;
     }
     if pattern.starts_with("\\") {
         match pattern {
