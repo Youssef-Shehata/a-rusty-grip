@@ -3,6 +3,19 @@ use std::io;
 use std::process;
 
 fn match_pattern(input_line: &str, pattern: &str) -> bool {
+    if pattern.starts_with("\\") {
+        match pattern {
+            "\\d" => {
+                for i in input_line.chars() {
+                    if let Some(_) = i.to_digit(10) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            _ => {}
+        };
+    };
     if pattern.chars().count() == 1 {
         return input_line.contains(pattern);
     } else {
@@ -27,8 +40,10 @@ fn main() {
 
     // Uncomment this block to pass the first stage
     if match_pattern(&input_line, &pattern) {
+        println!("oioi");
         process::exit(0)
     } else {
+        println!("nononon");
         process::exit(1)
     }
 }
