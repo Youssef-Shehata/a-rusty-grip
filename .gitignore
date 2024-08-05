@@ -10,5 +10,6 @@ codecrafters.yml
 
 codecrafters.yml
 **/*.rs.bk
+.codecrafters/
 
 *.pdb
