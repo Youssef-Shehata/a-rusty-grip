@@ -65,14 +65,9 @@ fn main() {
         }
     }
     println!("final_pat: {final_pat:?}");
-    for (index, letter) in final_pat.iter().enumerate() {
-        if let Some(input) = input_line.trim().chars().nth(index) {
-            if !match_pattern(&input.to_string(), letter) {
-                println!("nononon {} : {}", &input.to_string(), letter);
-                process::exit(1)
-            }
-        } else {
-            println!("nononon length not matched ");
+    for letter in final_pat.iter() {
+        if !match_pattern(&input_line, letter) {
+            println!("nononon {} : {}", input_line, letter);
             process::exit(1)
         }
     }
