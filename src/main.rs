@@ -37,13 +37,45 @@ fn main() {
     let mut input_line = String::new();
 
     io::stdin().read_line(&mut input_line).unwrap();
+    let pattern: Vec<&str> = pattern.split("").filter(|x| *x != "").collect();
+    let mut groups = String::new();
+    let mut slash_flag = false;
+    let mut brack_flag = false;
+    let mut final_pat: Vec<String> = Vec::new();
+    for (index, i) in pattern.iter().enumerate() {
+        if i.to_string() == r#"\"# {
+            slash_flag = true;
+            final_pat.push(format!("\\{}", pattern[index + 1]));
+            continue;
+        }
+        if i.to_string() == "[" {
+            brack_flag = true;
+        }
+        if !brack_flag && !slash_flag {
+            final_pat.push(i.to_string());
+        } else if !slash_flag {
+            groups = groups + i;
+        }
+        slash_flag = false;
 
-    // Uncomment this block to pass the first stage
-    if match_pattern(&input_line, &pattern) {
-        println!("oioi");
-        process::exit(0)
-    } else {
-        println!("nononon");
-        process::exit(1)
+        if i.to_string() == "]" {
+            brack_flag = false;
+            final_pat.push(groups);
+            groups = String::from("");
+        }
     }
+    println!("final_pat: {final_pat:?}");
+    for (index, letter) in final_pat.iter().enumerate() {
+        if let Some(input) = input_line.trim().chars().nth(index) {
+            if !match_pattern(&input.to_string(), letter) {
+                println!("nononon {} : {}", &input.to_string(), letter);
+                process::exit(1)
+            }
+        } else {
+            println!("nononon length not matched ");
+            process::exit(1)
+        }
+    }
+    println!("oioi");
+    process::exit(0)
 }
