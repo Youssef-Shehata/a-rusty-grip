@@ -42,6 +42,7 @@ fn main() {
     let mut slash_flag = false;
     let mut brack_flag = false;
     let mut final_pat: Vec<String> = Vec::new();
+
     for (index, i) in pattern.iter().enumerate() {
         if i.to_string() == r#"\"# {
             slash_flag = true;
@@ -65,12 +66,36 @@ fn main() {
         }
     }
     println!("final_pat: {final_pat:?}");
-    for letter in final_pat.iter() {
-        if !match_pattern(&input_line, letter) {
-            println!("nononon {} : {}", input_line, letter);
-            process::exit(1)
+    if match_big_pat(input_line, &final_pat) {
+        println!("oioi");
+        process::exit(0)
+    }
+    println!("nono");
+    process::exit(1)
+}
+fn match_big_pat(inputline: String, pattern: &Vec<String>) -> bool {
+    for (index, letter) in inputline.chars().enumerate() {
+        //println!("inputline index: {index} : {letter}");
+        if match_pattern(&letter.to_string(), &pattern[0]) {
+            //println!("inputline {letter} matches pattern {}", pattern[0]);
+
+            for (x, i) in pattern.iter().enumerate() {
+                if let Some(input) = inputline.chars().nth(x + index) {
+                    //if match_pattern(&input.to_string(), i) {
+                    //println!("inputline {input} matches pattern {i}");
+                    //}
+                    if !match_pattern(&input.to_string(), i) {
+                        println!("{input} : {i}");
+                        break;
+                    } else if x == pattern.len() - 1 {
+                        println!("finale : {input} : {i}");
+                        return true;
+                    }
+                } else {
+                    return false;
+                }
+            }
         }
     }
-    println!("oioi");
-    process::exit(0)
+    return false;
 }
