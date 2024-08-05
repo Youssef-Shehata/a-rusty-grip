@@ -54,12 +54,10 @@ fn grep(input: &str, pattern: &str) -> bool {
     if match_wild_patterns(String::from(input), &final_pat) {
         println!("true");
         return true;
-        //process::exit(0)
     }
 
     println!("false");
     return false;
-    //process::exit(1)
 }
 
 // Usage: echo <input_text> | your_program.sh -E <pattern>
@@ -76,7 +74,10 @@ fn main() {
     let mut input_line = String::new();
 
     io::stdin().read_line(&mut input_line).unwrap();
-    grep(&input_line, &pattern);
+    if grep(&input_line, &pattern) {
+        process::exit(0)
+    }
+    process::exit(1)
 }
 fn match_wild_patterns(inputline: String, pattern: &Vec<String>) -> bool {
     for (index, letter) in inputline.chars().enumerate() {
@@ -127,7 +128,7 @@ mod true_tests {
     }
     #[test]
     fn case3() {
-        assert!(grep("012", "\\d\\d\\d[sa]"));
+        assert!(grep("012", "\\d\\d\\d]"));
     }
     #[test]
     fn case4() {
@@ -152,6 +153,18 @@ mod true_tests {
     #[test]
     fn case9() {
         assert_eq!(grep("opac", "[^c]"), true);
+    }
+    #[test]
+    fn case10() {
+        assert_eq!(grep("opac", "^opa"), true);
+    }
+    #[test]
+    fn case11() {
+        assert_eq!(grep("opac", "^o"), true);
+    }
+    #[test]
+    fn case12() {
+        assert_eq!(grep("a", "^a"), true);
     }
 }
 
@@ -180,7 +193,7 @@ mod false_tests {
     }
     #[test]
     fn case6() {
-        assert_ne!(grep("daas", "^aas"), true);
+        assert_ne!(grep("22w ", "\\d\\dw [^sa]"), true);
     }
     #[test]
     fn case7() {
@@ -196,6 +209,10 @@ mod false_tests {
     }
     #[test]
     fn case10() {
-        assert_ne!(grep("22w ", "\\d\\dw [^sa]"), true);
+        assert_ne!(grep("daas", "^aas"), true);
+    }
+    #[test]
+    fn case11() {
+        assert_ne!(grep("slog", "^log"), true);
     }
 }
