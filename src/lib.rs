@@ -12,6 +12,7 @@ enum WhatWematchin {
     Group(String),
     Symbol(String),
     Quantifier(String),
+    WildCard(String),
 }
 impl Config {
     pub fn new(input: &[String]) -> Result<Config, &'static str> {
@@ -34,13 +35,21 @@ impl Config {
             let mut res: Vec<String> = Vec::new();
             for letter in temp.chars() {
                 match letter {
-                    mark if mark == '+' => {
+                    mark if mark == '+' || mark == '?' => {
                         let quantifier = res.pop().unwrap_or(String::from(""));
                         if !res.is_empty() {
                             final_pat.push(res.join(""));
                             res.clear();
                         }
                         final_pat.push(quantifier + &mark.to_string());
+                        continue;
+                    }
+                    '.' => {
+                        if !res.is_empty() {
+                            final_pat.push(res.join(""));
+                            res.clear();
+                        }
+                        final_pat.push(".".to_string());
                         continue;
                     }
                     _ => (),
@@ -101,8 +110,10 @@ impl Config {
                 pattern_enum.push(WhatWematchin::EndOfLine(String::from(pat)));
             } else if pat.starts_with("[") {
                 pattern_enum.push(WhatWematchin::Group(String::from(pat)));
-            } else if pat.ends_with("+") {
+            } else if pat.ends_with("+") || pat.ends_with("?") {
                 pattern_enum.push(WhatWematchin::Quantifier(String::from(pat)));
+            } else if pat == "." {
+                pattern_enum.push(WhatWematchin::WildCard(String::from(pat)));
             } else {
                 pat.split("").filter(|&x| x != "").for_each(|x| {
                     pattern_enum.push(WhatWematchin::Exact(String::from(x)));
@@ -136,6 +147,7 @@ pub fn grep(input: &str, pattern: &str) -> bool {
                     match_symbol(input.chars().nth(i).unwrap(), &pattern, &mut i)
                 }
                 WhatWematchin::Quantifier(pattern) => match_quantifier(&input, &pattern, &mut i),
+                WhatWematchin::WildCard(_) => match_wild_card(&input, &mut i),
             };
 
             if global_flag && index == pattern.len() - 1 {
@@ -236,9 +248,34 @@ fn match_quantifier(input: &str, pattern: &str, i: &mut usize) -> bool {
             }
             return true;
         }
+        pat if pat.ends_with("?") => {
+            println!(
+                "matching ? {} with {target}",
+                input.chars().nth(*i).unwrap()
+            );
+            loop {
+                if *i == input.len() - 1 || input.chars().nth(*i).unwrap() != target {
+                    break;
+                }
+                *i += 1;
+            }
+
+            return true;
+        }
         _ => {
             return false;
         }
+    }
+}
+fn match_wild_card(input: &str, i: &mut usize) -> bool {
+    println!("matchin i :  {i}");
+    if let Some(ch) = input.chars().nth(*i) {
+        println!("matchin wildcatd {ch}");
+        *i += 1;
+        return true;
+    } else {
+        *i += 1;
+        return false;
     }
 }
 //--------------------------------------------------------------//
@@ -403,5 +440,46 @@ pub mod plus {
     #[test]
     fn case31() {
         assert_eq!(grep("maa ", "ma+"), true);
+    }
+}
+pub mod question_mark {
+    use super::*;
+
+    #[test]
+    fn case32() {
+        assert_eq!(grep("mn ", "ma?n"), true);
+    }
+    #[test]
+    fn case33() {
+        assert_eq!(grep("maan ", "ma?n"), true);
+    }
+    #[test]
+    fn case34() {
+        assert_eq!(grep("mn ", "ma?"), true);
+    }
+    #[test]
+    fn case35() {
+        assert_eq!(grep("n", "a?n"), true);
+    }
+    #[test]
+    fn case36() {
+        assert_eq!(grep("aa ", "a?"), true);
+    }
+}
+
+pub mod wild_card {
+    use super::*;
+
+    #[test]
+    fn case37() {
+        assert_eq!(grep("mapn", "ma.n"), true);
+    }
+    #[test]
+    fn case38() {
+        assert_ne!(grep("mn ", "m.n"), true);
+    }
+    #[test]
+    fn case39() {
+        assert_eq!(grep("ma ", "ma."), true);
     }
 }
