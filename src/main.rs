@@ -1,6 +1,7 @@
-use grep_starter_rust::*;
 use std::env;
 
+mod grep;
+mod pattern_processor;
 use std::process;
 // Usage: echo <input_text> | your_program.sh -E <pattern>
 fn main() {
@@ -13,12 +14,12 @@ fn main() {
         process::exit(1);
     }
 
-    let config = Config::new(&args).unwrap_or_else(|e| {
+    let config = pattern_processor::Config::new(&args).unwrap_or_else(|e| {
         eprintln!("error parsing input : {}", e);
         process::exit(1)
     });
 
-    if grep(&config.input_line, &config.pattern) {
+    if grep::grep(&config.input_line, &config.pattern) {
         println!("match");
         process::exit(0)
     }
