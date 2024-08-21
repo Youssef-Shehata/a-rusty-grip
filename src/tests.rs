@@ -139,7 +139,7 @@ pub mod question_mark {
     }
     #[test]
     fn case33() {
-        assert_eq!(grep("maan ", "ma?n"), true);
+        assert_ne!(grep("maan ", "ma?n"), true);
     }
     #[test]
     fn case34() {
@@ -151,7 +151,7 @@ pub mod question_mark {
     }
     #[test]
     fn case36() {
-        assert_eq!(grep("aa ", "a?"), true);
+        assert_eq!(grep("maaasa ", "a?"), true);
     }
 }
 
@@ -210,5 +210,41 @@ pub mod combinations {
     #[test]
     fn comb3() {
         assert_eq!(grep("s22w", "\\w?\\d\\d."), true);
+    }
+}
+mod star {
+
+    use super::*;
+    #[test]
+    fn star1() {
+        assert_eq!(grep("w2w", "w\\d*w"), true);
+    }
+    #[test]
+    fn star3() {
+        assert_eq!(grep("w222w", "w\\d*w"), true);
+    }
+    #[test]
+    fn star4() {
+        assert_eq!(grep("ww", "w\\d*w"), true);
+    }
+    #[test]
+    fn star5() {
+        assert_eq!(grep("w", "\\d*w"), true);
+    }
+    #[test]
+    fn star6() {
+        assert_eq!(grep("2w", "\\d*w"), true);
+    }
+    #[test]
+    fn star7() {
+        assert_eq!(grep("222w", "\\d*w"), true);
+    }
+    #[test]
+    fn star8() {
+        assert_eq!(grep("w222", "w\\d*"), true);
+    }
+    #[test]
+    fn star9() {
+        assert_eq!(grep("w", "w\\d*"), true);
     }
 }

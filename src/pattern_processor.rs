@@ -44,9 +44,9 @@ impl Config {
         let mut res: Vec<String> = Vec::new();
         for letter in temp.chars() {
             match letter {
-                mark @ '+' | mark @ '?' | mark @ '.' | mark @ '$' | mark @ '^' => {
+                mark @ '+' | mark @ '?' | mark @ '.' | mark @ '$' | mark @ '^' | mark @ '*' => {
                     if !res.is_empty() {
-                        final_pat.push(res.join(""));
+                        final_pat.extend(res.clone());
                         res.clear();
                     }
                     final_pat.push(mark.to_string());
@@ -56,7 +56,7 @@ impl Config {
         }
 
         if !res.is_empty() {
-            final_pat.push(res.join(""));
+            final_pat.extend(res.clone());
         }
         temp.clear();
     }
@@ -104,7 +104,7 @@ impl Config {
         let mut compiled_pattern = Vec::new();
         for pat in tokenized_pattern.into_iter() {
             match pat.as_str() {
-                "?" | "+" => {
+                "?" | "+" | "*" => {
                     let target = compiled_pattern.pop().unwrap();
                     compiled_pattern.push(format!("{target}{pat}"));
                 }
