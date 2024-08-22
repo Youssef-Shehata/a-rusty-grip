@@ -42,7 +42,6 @@ fn match_exact(input: Option<char>, pattern: &str, i: &mut usize) -> bool {
     *i += 1;
     match input {
         Some(ch) => {
-            println!("matching {} with exactly {}", ch, pattern);
             if &ch.to_string() == pattern {
                 return true;
             } else {
@@ -63,7 +62,6 @@ fn line_matches(input: &str, pattern: &str, end: bool, i: &mut usize) -> bool {
     let input = input.join("");
     let pattern = pattern.join("");
 
-    println!("matchin line {input} with {pattern}");
     for (mut i, ch) in pattern[1..].chars().enumerate() {
         if let Some(x) = input.chars().nth(i) {
             if x != ch {
@@ -86,8 +84,6 @@ fn match_group(input_option: Option<char>, pattern: &str, i: &mut usize) -> bool
 
     match input_option {
         Some(input) => {
-            println!("matching {} with group {}", input, pattern);
-
             if pattern.starts_with("[^") {
                 let pattern = &pattern[2..pattern.len() - 1];
                 if pattern.contains(input) {
@@ -106,8 +102,6 @@ fn match_group(input_option: Option<char>, pattern: &str, i: &mut usize) -> bool
     }
 }
 fn match_symbol(input_option: Option<char>, pattern: &str, i: &mut usize) -> bool {
-    println!("matching symbol {}", pattern);
-
     *i += 1;
     match input_option {
         Some(input) => match pattern {
@@ -129,7 +123,6 @@ fn match_symbol(input_option: Option<char>, pattern: &str, i: &mut usize) -> boo
     }
 }
 fn match_quantifier(input: &str, pattern: &str, i: &mut usize) -> bool {
-    println!("QUANTIFIER");
     match pattern {
         pat if pat.ends_with("+") => {
             let mut counter = 0;
@@ -190,7 +183,6 @@ fn match_quantifier(input: &str, pattern: &str, i: &mut usize) -> bool {
     }
 }
 fn match_wild_card(input: char, i: &mut usize) -> bool {
-    println!("matchin wildcard {input}");
     *i += 1;
     return true;
 }

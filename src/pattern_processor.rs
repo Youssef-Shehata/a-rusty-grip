@@ -1,25 +1,42 @@
-use std::io;
+use std::io::{self, Read};
 #[allow(unused)]
 pub struct Config {
     pub pattern: String,
-    pub input_line: String,
+    pub input_lines: Vec<String>,
 }
 
 impl Config {
     #[allow(unused)]
     pub fn new(input: &[String]) -> Result<Config, &'static str> {
-        if input.len() < 3 {
-            return Err("not enough arguments");
+        if input.len() < 2 {
+            return Err("Not enough arguments");
         }
-        let pattern = input[2].clone();
+        let mut pattern = String::new();
+        for arg in input[1..].iter() {
+            match arg.as_str() {
+                s if s.starts_with("-") => match s {
+                    _ => {
+                        return Err("Uknown option, Use -h to list all available options.");
+                    }
+                },
+                _ => {
+                    pattern = arg.clone();
+                }
+            }
+        }
 
-        let mut input_line = String::new();
-        io::stdin().read_line(&mut input_line).unwrap();
-        input_line = input_line.trim_end_matches('\n').to_string();
+        let mut input_bytes = Vec::new();
+        io::stdin().read_to_end(&mut input_bytes).unwrap();
+        let input_string = String::from_utf8_lossy(&input_bytes);
+        let input_lines: Vec<String> = input_string
+            .split("\n")
+            .filter(|x| *x != "")
+            .map(|x| x.to_string())
+            .collect();
 
         Ok(Config {
             pattern,
-            input_line,
+            input_lines,
         })
     }
     fn extract_patterns(pattern: &str) -> Vec<String> {
@@ -125,7 +142,6 @@ impl Config {
             final_pattern.push(compiled_pattern);
         }
 
-        dbg!(&final_pattern);
         return final_pattern;
     }
 }
