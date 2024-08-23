@@ -1,13 +1,34 @@
-use crate::pattern_processor::Config;
+use crate::pattern_processor::{Config, Flags};
+
 #[allow(unused)]
-pub fn grep(input: &str, pattern: &str) -> bool {
-    let pattern = Config::get_pattern(pattern);
+pub fn grep_test(input: &str, pattern: &str) -> bool {
+    let pattern = Config::pattern_parser(pattern);
     for pat in pattern.iter() {
         if match_pattern(input, pat) {
             return true;
         }
     }
-    return false;
+    false
+}
+#[allow(unused)]
+pub fn grep(flags: &Flags, input: &str, pattern: &Vec<Vec<String>>) -> bool {
+    for pat in pattern.iter() {
+        if flags.case_insenstive {
+            if match_pattern(
+                &input.to_lowercase().to_string(),
+                &pat.into_iter()
+                    .map(|x| x.to_lowercase().to_string())
+                    .collect(),
+            ) {
+                return true;
+            }
+        } else {
+            if match_pattern(input, pat) {
+                return true;
+            }
+        }
+    }
+    false
 }
 
 fn match_pattern(input: &str, pattern: &Vec<String>) -> bool {

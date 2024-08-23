@@ -1,16 +1,16 @@
-use crate::grep::grep;
+use crate::grep::grep_test;
 #[cfg(test)]
 pub mod exact {
     use super::*;
 
     #[test]
     fn case1() {
-        assert_eq!(grep("wd", "d"), true);
+        assert_eq!(grep_test("wd", "d"), true);
     }
 
     #[test]
     fn case2() {
-        assert!(grep("ass", "ass"));
+        assert!(grep_test("ass", "ass"));
     }
 }
 #[cfg(test)]
@@ -19,11 +19,11 @@ pub mod symbols {
     use super::*;
     #[test]
     fn case3() {
-        assert!(grep("2", "\\d"));
+        assert!(grep_test("2", "\\d"));
     }
     #[test]
     fn case4() {
-        assert!(grep("012", "\\d\\d\\d"));
+        assert!(grep_test("012", "\\d\\d\\d"));
     }
 }
 #[cfg(test)]
@@ -32,19 +32,19 @@ pub mod groups {
 
     #[test]
     fn case5() {
-        assert_ne!(grep("w29d", "[sa]"), true);
+        assert_ne!(grep_test("w29d", "[sa]"), true);
     }
     #[test]
     fn case6() {
-        assert!(grep("oopspp", "[so]"));
+        assert!(grep_test("oopspp", "[so]"));
     }
     #[test]
     fn case7() {
-        assert!(grep("019248apapopopiw23", "[^nmbv]"));
+        assert!(grep_test("019248apapopopiw23", "[^nmbv]"));
     }
     #[test]
     fn case8() {
-        assert!(grep("qwe", "[sw]"));
+        assert!(grep_test("qwe", "[sw]"));
     }
 }
 #[cfg(test)]
@@ -52,35 +52,35 @@ pub mod beginning_of_line {
     use super::*;
     #[test]
     fn case12() {
-        assert_eq!(grep("opac", "^opa"), true);
+        assert_eq!(grep_test("opac", "^opa"), true);
     }
     #[test]
     fn case13() {
-        assert_eq!(grep("opac", "^o"), true);
+        assert_eq!(grep_test("opac", "^o"), true);
     }
     #[test]
     fn case14() {
-        assert_eq!(grep("a", "^a"), true);
+        assert_eq!(grep_test("a", "^a"), true);
     }
     #[test]
     fn case18() {
-        assert_ne!(grep("da", "^das"), true);
+        assert_ne!(grep_test("da", "^das"), true);
     }
     #[test]
     fn case19() {
-        assert_ne!(grep("ad", "^d"), true);
+        assert_ne!(grep_test("ad", "^d"), true);
     }
     #[test]
     fn case20() {
-        assert_ne!(grep("1p", "^1 "), true);
+        assert_ne!(grep_test("1p", "^1 "), true);
     }
     #[test]
     fn case21() {
-        assert_ne!(grep("daas", "^aas"), true);
+        assert_ne!(grep_test("daas", "^aas"), true);
     }
     #[test]
     fn case22() {
-        assert_ne!(grep("slog", "^log"), true);
+        assert_ne!(grep_test("slog", "^log"), true);
     }
 }
 
@@ -90,19 +90,19 @@ pub mod end_of_line {
 
     #[test]
     fn case23() {
-        assert_ne!(grep("man ", "man$"), true);
+        assert_ne!(grep_test("man ", "man$"), true);
     }
     #[test]
     fn case24() {
-        assert!(grep("o", "o$"));
+        assert!(grep_test("o", "o$"));
     }
     #[test]
     fn case25() {
-        assert!(grep("mad man", "man$"));
+        assert!(grep_test("mad man", "man$"));
     }
     #[test]
     fn case26() {
-        assert!(grep("qwe  ", "  $"));
+        assert!(grep_test("qwe  ", "  $"));
     }
 }
 #[cfg(test)]
@@ -111,23 +111,23 @@ pub mod plus {
 
     #[test]
     fn case27() {
-        assert_eq!(grep("man ", "ma+n"), true);
+        assert_eq!(grep_test("man ", "ma+n"), true);
     }
     #[test]
     fn case28() {
-        assert_eq!(grep("maan ", "ma+n"), true);
+        assert_eq!(grep_test("maan ", "ma+n"), true);
     }
     #[test]
     fn case29() {
-        assert_ne!(grep("mn ", "ma+n"), true);
+        assert_ne!(grep_test("mn ", "ma+n"), true);
     }
     #[test]
     fn case30() {
-        assert_eq!(grep("aan ", "a+n"), true);
+        assert_eq!(grep_test("aan ", "a+n"), true);
     }
     #[test]
     fn case31() {
-        assert_eq!(grep("maa ", "ma+"), true);
+        assert_eq!(grep_test("maa ", "ma+"), true);
     }
 }
 pub mod question_mark {
@@ -135,23 +135,23 @@ pub mod question_mark {
 
     #[test]
     fn case32() {
-        assert_eq!(grep("mn ", "ma?n"), true);
+        assert_eq!(grep_test("mn ", "ma?n"), true);
     }
     #[test]
     fn case33() {
-        assert_ne!(grep("maan ", "ma?n"), true);
+        assert_ne!(grep_test("maan ", "ma?n"), true);
     }
     #[test]
     fn case34() {
-        assert_eq!(grep("mn ", "ma?"), true);
+        assert_eq!(grep_test("mn ", "ma?"), true);
     }
     #[test]
     fn case35() {
-        assert_eq!(grep("n", "a?n"), true);
+        assert_eq!(grep_test("n", "a?n"), true);
     }
     #[test]
     fn case36() {
-        assert_eq!(grep("maaasa ", "a?"), true);
+        assert_eq!(grep_test("maaasa ", "a?"), true);
     }
 }
 
@@ -160,15 +160,15 @@ pub mod wild_card {
 
     #[test]
     fn case37() {
-        assert_eq!(grep("mapn", "ma.n"), true);
+        assert_eq!(grep_test("mapn", "ma.n"), true);
     }
     #[test]
     fn case38() {
-        assert_ne!(grep("mn ", "m.n"), true);
+        assert_ne!(grep_test("mn ", "m.n"), true);
     }
     #[test]
     fn case39() {
-        assert_eq!(grep("ma ", "ma."), true);
+        assert_eq!(grep_test("ma ", "ma."), true);
     }
 }
 #[cfg(test)]
@@ -177,39 +177,39 @@ pub mod combinations {
     use super::*;
     #[test]
     fn case9() {
-        assert!(grep("d2d apple", "\\w\\d\\w apple"));
+        assert!(grep_test("d2d apple", "\\w\\d\\w apple"));
     }
     #[test]
     fn case10() {
-        assert!(grep("22w a", "\\d\\dw [sa]"));
+        assert!(grep_test("22w a", "\\d\\dw [sa]"));
     }
     #[test]
     fn case11() {
-        assert_eq!(grep("opac", "[^c]"), true);
+        assert_eq!(grep_test("opac", "[^c]"), true);
     }
     #[test]
     fn case15() {
-        assert_ne!(grep("dsx", "d[pw]x"), true);
+        assert_ne!(grep_test("dsx", "d[pw]x"), true);
     }
     #[test]
     fn case16() {
-        assert_ne!(grep("12 ds 21", "12 ds [^2]1"), true);
+        assert_ne!(grep_test("12 ds 21", "12 ds [^2]1"), true);
     }
     #[test]
     fn case17() {
-        assert_ne!(grep("22w ", "\\d\\dw [^sa]"), true);
+        assert_ne!(grep_test("22w ", "\\d\\dw [^sa]"), true);
     }
     #[test]
     fn comb1() {
-        assert_eq!(grep("22w w   ", "\\d\\dw [^sa].+"), true);
+        assert_eq!(grep_test("22w w   ", "\\d\\dw [^sa].+"), true);
     }
     #[test]
     fn comb2() {
-        assert_eq!(grep("22w", "\\d\\dws?"), true);
+        assert_eq!(grep_test("22w", "\\d\\dws?"), true);
     }
     #[test]
     fn comb3() {
-        assert_eq!(grep("s22w", "\\w?\\d\\d."), true);
+        assert_eq!(grep_test("s22w", "\\w?\\d\\d."), true);
     }
 }
 mod star {
@@ -217,34 +217,34 @@ mod star {
     use super::*;
     #[test]
     fn star1() {
-        assert_eq!(grep("w2w", "w\\d*w"), true);
+        assert_eq!(grep_test("w2w", "w\\d*w"), true);
     }
     #[test]
     fn star3() {
-        assert_eq!(grep("w222w", "w\\d*w"), true);
+        assert_eq!(grep_test("w222w", "w\\d*w"), true);
     }
     #[test]
     fn star4() {
-        assert_eq!(grep("ww", "w\\d*w"), true);
+        assert_eq!(grep_test("ww", "w\\d*w"), true);
     }
     #[test]
     fn star5() {
-        assert_eq!(grep("w", "\\d*w"), true);
+        assert_eq!(grep_test("w", "\\d*w"), true);
     }
     #[test]
     fn star6() {
-        assert_eq!(grep("2w", "\\d*w"), true);
+        assert_eq!(grep_test("2w", "\\d*w"), true);
     }
     #[test]
     fn star7() {
-        assert_eq!(grep("222w", "\\d*w"), true);
+        assert_eq!(grep_test("222w", "\\d*w"), true);
     }
     #[test]
     fn star8() {
-        assert_eq!(grep("w222", "w\\d*"), true);
+        assert_eq!(grep_test("w222", "w\\d*"), true);
     }
     #[test]
     fn star9() {
-        assert_eq!(grep("w", "w\\d*"), true);
+        assert_eq!(grep_test("w", "w\\d*"), true);
     }
 }

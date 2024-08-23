@@ -10,10 +10,65 @@ fn main() {
         process::exit(1)
     });
 
-    for line in config.input_lines.iter() {
-        if grep::grep(&line, &config.pattern) {
-            println!("{line}");
+    let flags = config.flags;
+    let mut count = 0;
+
+    match config.input_lines {
+        pattern_processor::InputEnum::StdInput(line) => {
+            for (index, line) in line.iter().enumerate() {
+                if grep::grep(&flags, &line, &config.pattern) {
+                    if !flags.invert_match {
+                        count += 1;
+                        if !flags.count {
+                            if flags.line_numbers {
+                                println!("{}:{line}", index + 1);
+                            } else {
+                                println!("{line}");
+                            }
+                        }
+                    }
+                } else if flags.invert_match {
+                    count += 1;
+                    if !flags.count {
+                        if flags.line_numbers {
+                            println!("{}:{line}", index + 1);
+                        } else {
+                            println!("{line}");
+                        }
+                    }
+                }
+            }
         }
+        pattern_processor::InputEnum::FileInput(files) => {
+            for file in files.iter() {
+                for (index, line) in file.buffer.iter().enumerate() {
+                    if grep::grep(&flags, &line, &config.pattern) {
+                        if !flags.invert_match {
+                            count += 1;
+                            if !flags.count {
+                                if flags.line_numbers {
+                                    println!("{}:{}:{line}", file.name, index + 1);
+                                } else {
+                                    println!("{}:{line}", file.name);
+                                }
+                            }
+                        }
+                    } else if flags.invert_match {
+                        count += 1;
+                        if !flags.count {
+                            if flags.line_numbers {
+                                println!("{}:{}:{line}", file.name, index + 1);
+                            } else {
+                                println!("{}:{line}", file.name);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if flags.count {
+        println!("{count}");
     }
     process::exit(0)
 }

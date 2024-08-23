@@ -1,56 +1,194 @@
 use std::io::{self, Read};
+use std::process::{self, exit};
+use std::{fs, string};
+
+const HELP_MESSAGE: &str = r#"
+Usage: grep [OPTION]... PATTERNS [FILE]...
+Search for PATTERNS in each FILE.
+Example: grep -i 'hello world' menu.h main.c
+PATTERNS can contain multiple patterns separated by newlines.
+
+Pattern selection and interpretation:
+  -E, --extended-regexp     PATTERNS are extended regular expressions
+  -F, --fixed-strings       PATTERNS are strings
+  -i, --ignore-case         ignore case distinctions in patterns and data
+
+  -v, --invert-match        select non-matching lines
+  -h, --help                display this help text and exit
+
+Output control:
+  -m, --max-count=NUM       stop after NUM selected lines
+  -n, --line-number         print line number with output lines
+  -L, --files-without-match print only names of FILEs with no selected lines
+  -l, --files-with-matches  print only names of FILEs with selected lines
+  -c, --count               print only a count of selected lines per FILE
+"#;
+
+#[allow(unused)]
+pub struct File {
+    pub name: String,
+    pub buffer: Vec<String>,
+}
+impl File {
+    pub fn new(name: String, buffer: Vec<String>) -> File {
+        File { name, buffer }
+    }
+}
+#[allow(unused)]
+pub struct Flags {
+    pub case_insenstive: bool,
+    pub invert_match: bool,
+    pub count: bool,
+    pub line_numbers: bool,
+    pub ere: bool,
+    pub fixed_string: bool,
+    pub marks: Vec<char>,
+}
+impl Flags {
+    pub fn new() -> Flags {
+        Self {
+            case_insenstive: false,
+            invert_match: false,
+            count: false,
+            line_numbers: false,
+            ere: false,
+            fixed_string: false,
+            marks: vec!['+', '?', '.', '$', '^', '*'],
+        }
+    }
+}
+#[allow(unused)]
+pub enum InputEnum {
+    FileInput(Vec<File>),
+    StdInput(Vec<String>),
+}
 #[allow(unused)]
 pub struct Config {
-    pub pattern: String,
-    pub input_lines: Vec<String>,
+    pub pattern: Vec<Vec<String>>,
+    pub input_lines: InputEnum,
+    pub flags: Flags,
 }
-
 impl Config {
     #[allow(unused)]
-    pub fn new(input: &[String]) -> Result<Config, &'static str> {
+    pub fn new(input: &[String]) -> Result<Config, String> {
         if input.len() < 2 {
-            return Err("Not enough arguments");
+            return Err("Not enough arguments".to_string());
         }
-        let mut pattern = String::new();
+
+        let mut flags = Flags::new();
+        let mut args = Vec::new();
         for arg in input[1..].iter() {
             match arg.as_str() {
-                s if s.starts_with("-") => match s {
-                    _ => {
-                        return Err("Uknown option, Use -h to list all available options.");
+                s if s.starts_with("-") => {
+                    let s_vec: Vec<&str> = s[1..].split("").filter(|x| *x != "").collect();
+                    for i in s_vec.iter() {
+                        match *i {
+                            "i" | "-ignore-case" => {
+                                flags.case_insenstive = true;
+                            }
+                            "v" | "-invert-match" => {
+                                flags.invert_match = true;
+                            }
+                            "c" | "-count" => {
+                                flags.count = true;
+                            }
+                            "n" | "-line-number" => {
+                                flags.line_numbers = true;
+                            }
+                            "E" | "-extended-regexp" => {
+                                flags.ere = true;
+                            }
+                            "F" | "-fixed-strings" => flags.fixed_string = true,
+
+                            "h" | "-help" => {
+                                println!(r#"{HELP_MESSAGE}"#);
+                                process::exit(0);
+                            }
+
+                            _ => {
+                                return Err(format!(
+                                    "Uknown option -{}, Use -h to list all available options.",
+                                    *i
+                                ));
+                            }
+                        }
                     }
-                },
+                }
                 _ => {
-                    pattern = arg.clone();
+                    args.push(arg.clone());
                 }
             }
         }
 
-        let mut input_bytes = Vec::new();
-        io::stdin().read_to_end(&mut input_bytes).unwrap();
-        let input_string = String::from_utf8_lossy(&input_bytes);
-        let input_lines: Vec<String> = input_string
-            .split("\n")
-            .filter(|x| *x != "")
-            .map(|x| x.to_string())
-            .collect();
-
+        if let None = args.get(0) {
+            return Err("No pattern Provided".to_string());
+        }
+        let pattern = args[0].clone();
+        let pattern = Self::pattern_parser(&pattern);
+        let input_lines = Self::read_input(args)?;
         Ok(Config {
             pattern,
             input_lines,
+            flags,
         })
     }
-    fn extract_patterns(pattern: &str) -> Vec<String> {
-        let mut pattern: Vec<String> = pattern.split('|').map(|s| s.to_string()).collect();
+    fn read_input(args: Vec<String>) -> Result<InputEnum, String> {
+        let mut files = Vec::new();
+        if !args[1..].is_empty() {
+            for arg in args[1..].iter() {
+                let mut file_content = String::new();
+                match fs::read_to_string(arg) {
+                    Ok(contents) => {
+                        file_content.push_str(&contents);
+                    }
+                    Err(e) => {
+                        return Err("reading file : {e}".to_string());
+                    }
+                }
 
-        for pat in pattern.iter_mut() {
+                let line: Vec<String> = file_content
+                    .trim_end()
+                    .split("\n")
+                    .map(|x| x.to_string())
+                    .collect();
+                let file = File::new(arg.clone(), line);
+                files.push(file);
+            }
+            if files.len() > 1 {
+                return Ok(InputEnum::FileInput(files));
+            } else {
+                return Ok(InputEnum::StdInput(files[0].buffer.clone()));
+            }
+        }
+
+        let mut std_input = String::new();
+        io::stdin().read_to_string(&mut std_input).unwrap();
+
+        let line: Vec<String> = std_input
+            .trim_end()
+            .split("\n")
+            .map(|x| x.to_string())
+            .collect();
+        Ok(InputEnum::StdInput(line))
+    }
+
+    pub fn pattern_parser(pattern: &str) -> Vec<Vec<String>> {
+        let mut patterns: Vec<String> = pattern.split('|').map(|s| s.to_string()).collect();
+        for pat in patterns.iter_mut() {
             *pat = pat
                 .trim()
                 .chars()
                 .filter(|x| *x != '(' && *x != ')')
                 .collect();
         }
+        let mut final_pattern = Vec::new();
+        for pat in patterns {
+            let tokenized_pattern = Self::tokenize_pattern(pat);
+            let compiled_pattern = Self::compile_pattern(tokenized_pattern);
 
-        pattern
+            final_pattern.push(compiled_pattern);
+        }
+        final_pattern
     }
 
     fn distinguish_marks(final_pat: &mut Vec<String>, temp: &mut String) {
@@ -84,9 +222,7 @@ impl Config {
         let mut temp = String::new();
         let mut slash_flag = false;
         let mut brack_flag = false;
-
         let mut tokenized_pattern: Vec<String> = Vec::new();
-
         for (index, &i) in pattern.iter().enumerate() {
             if i == r#"\"# {
                 Self::distinguish_marks(&mut tokenized_pattern, &mut temp);
@@ -131,17 +267,5 @@ impl Config {
             }
         }
         return compiled_pattern;
-    }
-    pub fn get_pattern(pattern: &str) -> Vec<Vec<String>> {
-        let patterns = Self::extract_patterns(pattern);
-        let mut final_pattern = Vec::new();
-        for pat in patterns {
-            let tokenized_pattern = Self::tokenize_pattern(pat);
-            let compiled_pattern = Self::compile_pattern(tokenized_pattern);
-
-            final_pattern.push(compiled_pattern);
-        }
-
-        return final_pattern;
     }
 }
