@@ -1,0 +1,4 @@
+
+create an interface for grepping with an implementation for each of the options :
+    this way u could get rid of all the nested ifs
+    

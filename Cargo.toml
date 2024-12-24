@@ -8,5 +8,7 @@ authors = ["Youssef-Shehata"]
 edition = "2021"
 
 [dependencies]
+anyhow = "1.0.89"
 bytes = "1.3.0"                                  # helps manage buffers
+clap = "4.5.18"
 thiserror = "1.0.38"                             # error handling

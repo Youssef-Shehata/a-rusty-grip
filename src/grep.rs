@@ -1,8 +1,8 @@
-use crate::pattern_processor::{Config, Flags};
+use crate::pattern_processor::{pattern_parser, Flags};
 
 #[allow(unused)]
 pub fn grep_test(input: &str, pattern: &str) -> bool {
-    let pattern = Config::pattern_parser(pattern);
+    let pattern = pattern_parser(pattern);
     for pat in pattern.iter() {
         if match_pattern(input, pat) {
             return true;
@@ -12,25 +12,22 @@ pub fn grep_test(input: &str, pattern: &str) -> bool {
 }
 #[allow(unused)]
 pub fn grep(flags: &Flags, input: &str, pattern: &Vec<Vec<String>>) -> bool {
+    let mut res = false;
     for pat in pattern.iter() {
+        let casei_input = &input.to_lowercase().to_string();
+        let casei_pat: &Vec<String> = &pat
+            .into_iter()
+            .map(|x| x.to_lowercase().to_string())
+            .collect();
+
         if flags.case_insenstive {
-            if match_pattern(
-                &input.to_lowercase().to_string(),
-                &pat.into_iter()
-                    .map(|x| x.to_lowercase().to_string())
-                    .collect(),
-            ) {
-                return true;
-            }
+            res = match_pattern(casei_input, casei_pat)
         } else {
-            if match_pattern(input, pat) {
-                return true;
-            }
+            res = match_pattern(input, pat);
         }
     }
-    false
+    return res;
 }
-
 fn match_pattern(input: &str, pattern: &Vec<String>) -> bool {
     let mut i = 0;
     while i < input.len() {
